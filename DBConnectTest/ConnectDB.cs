@@ -8,15 +8,15 @@ using System.Data;
 
 namespace DBConnectTest
 {
-	public static class ConnectDB
-	{
+    public static class ConnectDB
+    {
         public static string GetConnectionString()
         {
             var builder = new SqlConnectionStringBuilder()
             {
-                DataSource = "SAWASICKWIN10",
-                IntegratedSecurity = true,
-                InitialCatalog = "Test"
+                DataSource = "SAWASICKWIN10", // 接続するサーバー名
+                IntegratedSecurity = true, // Windows認証ならtrueにする
+                InitialCatalog = "Test" // 接続するDB名
                 //UserID = "(ユーザー名)",
                 //Password = "(パスワード)"
             };
@@ -24,12 +24,15 @@ namespace DBConnectTest
             return builder.ToString();
         }
 
-        public static void Connect()
-		{
-            var table = new DataTable();
+        private static SqlConnection CreateConnection(string connection) => new SqlConnection(connection);
+
+        private static string CreateCommandText() => @"SELECT Id, Number, Name FROM MainTable"; // stringBuilderで作って、stringで返すも良し
+
+        public static DataTable Connect()
+        {
             var connectionString = GetConnectionString();
 
-            using (var connection = new SqlConnection(connectionString))
+            using (var connection = CreateConnection(connectionString))
             using (var command = connection.CreateCommand())
             {
                 try
@@ -38,17 +41,25 @@ namespace DBConnectTest
                     connection.Open();
 
                     // SQLの実行
-                    command.CommandText = @"SELECT Id, Number, Name FROM MainTable";
+                    command.CommandText = CreateCommandText();
                     //command.ExecuteNonQuery();
+
+
+                    // SqlDataAdaperを使用(DataTableに取得データを格納)
+                    var table = new DataTable();
                     var adapter = new SqlDataAdapter(command);
                     adapter.Fill(table);
-                    foreach(DataRow target in table.Rows)
-					{
-                        Console.WriteLine("DO");
-                        Console.WriteLine(target["Id"]);
-                        Console.WriteLine(target["Number"]);
-                        Console.WriteLine(target["Name"]);
-                    }
+                    //foreach (DataRow target in table.Rows)
+                    //{
+                    //var id = target["Id"].ToString();
+                    //var number = target["Number"].ToString();
+                    //var name = target["Name"].ToString();
+                    //Console.WriteLine("DO");
+                    //Console.WriteLine(target["Id"]);
+                    //Console.WriteLine(target["Number"]);
+                    //Console.WriteLine(target["Name"]);
+                    //}
+                    return table;
                 }
                 catch (Exception exception)
                 {
@@ -62,5 +73,5 @@ namespace DBConnectTest
                 }
             }
         }
-	}
+    }
 }

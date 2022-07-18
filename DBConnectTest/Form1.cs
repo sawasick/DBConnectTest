@@ -10,12 +10,17 @@ using System.Windows.Forms;
 
 namespace DBConnectTest
 {
-	public partial class Form1 : Form
-	{
-		public Form1()
-		{
-			InitializeComponent();
-			ConnectDB.Connect();
-		}
-	}
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+            var table = ConnectDB.Connect();
+            foreach (DataRow data in table.Rows)
+            {
+                var item = new ListViewItem(new string[] { data["Number"].ToString(), data["Name"].ToString()});
+                listView1.Items.Add(item);
+            }
+        }
+    }
 }
